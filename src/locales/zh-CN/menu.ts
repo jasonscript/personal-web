@@ -50,4 +50,5 @@ export default {
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
   'menu.list.temperature-list': '温度表格',
+  'menu.list.gains-list': '收益表格',
 };
