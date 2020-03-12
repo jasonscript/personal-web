@@ -1,10 +1,11 @@
 import request from '@/utils/request';
+import { getCookie } from '@/utils/utils';
 import { TableListParams, TableListItem } from './data.d';
 
-export async function queryRule(params?: TableListParams) {
-  return request('/api/rule', {
+export async function queryTemperature(params?: TableListParams) {
+  return request('/api-local/temperature', {
     params,
-  });
+  }).then(res => ({ data: res, total: res.length }));
 }
 
 export async function removeRule(params: { key: number[] }) {
@@ -17,12 +18,14 @@ export async function removeRule(params: { key: number[] }) {
   });
 }
 
-export async function addRule(params: TableListItem) {
-  return request('/api/rule', {
-    method: 'POST',
+export async function addTemperature(params: TableListItem) {
+  return request('/api-local/temperature', {
+    method: 'PUT',
     data: {
       ...params,
-      method: 'post',
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
     },
   });
 }

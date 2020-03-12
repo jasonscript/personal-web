@@ -63,3 +63,12 @@ export const getRouteAuthority = (path: string, routeData: Route[]) => {
   });
   return authorities;
 };
+
+export const getCookie = (name: string) => {
+  const regName: RegExp = new RegExp(`(^| )${name}=([^;]*)(;|$)`);
+  const arr = document.cookie.match(regName);
+  if (arr) {
+    return unescape(arr[2]);
+  }
+  return '';
+};

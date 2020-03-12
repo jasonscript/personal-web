@@ -135,7 +135,7 @@ export default {
               ],
             },
             {
-              name: 'list.table-list',
+              name: 'list.temperature-list',
               icon: 'table',
               path: '/list',
               component: './ListTableList',
