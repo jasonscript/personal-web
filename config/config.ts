@@ -136,6 +136,12 @@ export default {
               component: './ListTableList',
             },
             {
+              name: 'list.temperature-chart',
+              icon: 'line-chart',
+              path: '/temperature-chart',
+              component: './TemperatureChart',
+            },
+            {
               name: 'list.gains-list',
               icon: 'account-book',
               path: '/gains-list',
