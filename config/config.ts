@@ -148,6 +148,12 @@ export default {
               component: './GainsTableList',
             },
             {
+              name: 'list.gains-chart',
+              icon: 'bar-chart',
+              path: '/gains-chart',
+              component: './GainsChart',
+            },
+            {
               component: './404',
             },
           ],

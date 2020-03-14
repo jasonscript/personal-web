@@ -1,4 +1,4 @@
-import { Axis, Chart, Geom, Legend, Tooltip, Guide } from 'bizcharts';
+import { Axis, Chart, Geom, Legend, Tooltip } from 'bizcharts';
 
 import DataSet from '@antv/data-set';
 import React from 'react';
@@ -24,7 +24,7 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
   const {
     title,
     height = 400,
-    padding = [60, 60, 40, 83] as [number, number, number, number],
+    padding = [60, 20, 40, 40] as [number, number, number, number],
     titleMap = {
       y1: 'y1',
       y2: 'y2',
@@ -33,12 +33,11 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
     data: sourceData,
   } = props;
 
-  const data =
-    Array.isArray(sourceData) && sourceData.length > 0 ? sourceData : [{ x: 0, y1: 0, y2: 0 }];
+  const data = Array.isArray(sourceData) ? sourceData : [{ x: 0, y1: 0, y2: 0 }];
 
   data.sort((a, b) => a.x - b.x);
 
-  let max = 35;
+  let max;
   if (data[0] && data[0].y1 && data[0].y2) {
     max = Math.max(
       [...data].sort((a, b) => b.y1 - a.y1)[0].y1,
@@ -80,8 +79,8 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
 
   const timeScale = {
     type: 'time',
-    // tickInterval: 60 * 60 * 1000,
-    mask: 'MM-DD HH:mm',
+    tickInterval: 60 * 60 * 1000,
+    mask: 'HH:mm',
     range: [0, 1],
   };
 
@@ -89,7 +88,7 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
     x: timeScale,
     value: {
       max,
-      min: 35,
+      min: 0,
     },
   };
 
@@ -118,31 +117,8 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
         {title && <h4>{title}</h4>}
         <Chart height={height} padding={padding} data={dv} scale={cols} forceFit>
           <Axis name="x" />
-          <Axis name="value" label={{ formatter: text => `${text}℃` }} />
           <Tooltip />
           <Legend name="key" position="top" />
-          <Guide>
-            <Guide.Line
-              start={['min', 37.3]}
-              end={['max', 37.3]}
-              lineStyle={{
-                stroke: '#f00',
-                lineWidth: 1,
-                lineDash: [3, 3],
-              }}
-              text={{
-                position: 'start',
-                style: {
-                  fill: '#f00',
-                  fontSize: 12,
-                  fontWeight: 'normal',
-                },
-                content: '预警线37.3℃',
-                offsetX: -83,
-                offsetY: 8,
-              }}
-            />
-          </Guide>
           <Geom type="line" position="x*value" size={borderWidth} color="key" />
         </Chart>
         <div style={{ marginRight: -20 }}>
