@@ -84,87 +84,83 @@ export default {
   // umi routes: https://umijs.org/zh/guide/router.html
   routes: [
     {
-      path: '/user',
-      component: '../layouts/UserLayout',
-      routes: [
-        {
-          name: 'login',
-          path: '/user/login',
-          component: './user/login',
-        },
-      ],
-    },
-    {
       path: '/',
-      component: '../layouts/SecurityLayout',
+      component: '../layouts/BlankLayout',
       routes: [
         {
-          path: '/',
-          component: '../layouts/BasicLayout',
-          authority: ['admin', 'user'],
+          path: '/user',
+          component: '../layouts/UserLayout',
           routes: [
             {
-              path: '/',
-              redirect: '/welcome',
+              path: '/user',
+              redirect: '/user/login',
             },
             {
-              path: '/welcome',
-              name: 'welcome',
+              name: 'login',
               icon: 'smile',
-              component: './Welcome',
+              path: '/user/login',
+              component: './user/login',
             },
             {
-              path: '/admin',
-              name: 'admin',
-              icon: 'crown',
-              component: './Admin',
-              authority: ['admin'],
-              routes: [
-                {
-                  path: '/admin/sub-page',
-                  name: 'sub-page',
-                  icon: 'smile',
-                  component: './Welcome',
-                  authority: ['admin'],
-                },
-              ],
-            },
-            {
-              name: 'list.temperature-list',
-              icon: 'fire',
-              path: '/temperature-list',
-              component: './ListTableList',
-            },
-            {
-              name: 'list.temperature-chart',
-              icon: 'line-chart',
-              path: '/temperature-chart',
-              component: './TemperatureChart',
-            },
-            {
-              name: 'list.gains-list',
-              icon: 'account-book',
-              path: '/gains-list',
-              component: './GainsTableList',
-            },
-            {
-              name: 'list.gains-chart',
-              icon: 'bar-chart',
-              path: '/gains-chart',
-              component: './GainsChart',
-            },
-            {
-              component: './404',
+              component: '404',
             },
           ],
         },
         {
-          component: './404',
+          path: '/',
+          component: '../layouts/BasicLayout',
+          Routes: ['src/pages/Authorized'],
+          authority: ['admin', 'user'],
+          routes: [
+            {
+              path: '/temperature',
+              name: 'temperature',
+              icon: 'bulb',
+              routes: [
+                {
+                  name: 'list',
+                  icon: 'table',
+                  path: '/temperature/list',
+                  component: './temperature/list',
+                },
+                {
+                  name: 'chart',
+                  icon: 'line-chart',
+                  path: '/temperature/chart',
+                  component: './temperature/chart',
+                },
+              ],
+            },
+            {
+              path: '/gains',
+              name: 'gains',
+              icon: 'money-collect',
+              routes: [
+                {
+                  name: 'list',
+                  icon: 'table',
+                  path: '/gains/list',
+                  component: './gains/list',
+                },
+                {
+                  name: 'chart',
+                  icon: 'line-chart',
+                  path: '/gains/chart',
+                  component: './gains/chart',
+                },
+              ],
+            },
+            {
+              path: '/',
+              redirect: '/temperature/list',
+              authority: ['admin', 'user'],
+            },
+            {
+              component: '404',
+            },
+          ],
         },
       ],
-    },
-    {
-      component: './404',
     },
   ],
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn

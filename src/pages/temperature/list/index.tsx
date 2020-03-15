@@ -7,7 +7,7 @@ import { SorterResult } from 'antd/es/table/interface';
 import moment from 'moment';
 
 import CreateForm from './components/CreateForm';
-import { TableListItem } from './data.d';
+import { TableListItem } from './data';
 import { queryTemperature, addTemperature } from './service';
 
 /**
