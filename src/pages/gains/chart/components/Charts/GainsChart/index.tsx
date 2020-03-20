@@ -23,7 +23,7 @@ const GainsChart: React.FC<GainsChartProps> = props => {
   const {
     title,
     height = 400,
-    padding = [60, 40, 80, 40] as [number, number, number, number],
+    padding = [60, 80, 80, 40] as [number, number, number, number],
     data: sourceData,
   } = props;
 
@@ -72,6 +72,11 @@ const GainsChart: React.FC<GainsChartProps> = props => {
     },
   };
 
+  const color = {
+    alipay: '#1977fd',
+    cmb: '#d81e06',
+  };
+
   const SliderGen = () => (
     <Slider
       padding={[0, padding[1] + 20, 0, padding[3]]}
@@ -91,47 +96,45 @@ const GainsChart: React.FC<GainsChartProps> = props => {
     />
   );
 
-  const Analysis = () => {
-    const { start, end } = ds.state;
-    const startDate = moment(start).format('MM-DD');
-    const endDate = moment(end).format('MM-DD');
-    const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
-    const total = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-      .reduce((p, c) => p + c.total, 0);
-    const avg = total / days;
-    const totalAli = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-      .reduce((p, c) => p + c.money, 0);
-    const avgAli = totalAli / days;
-    const totalCMB = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'CMB')
-      .reduce((p, c) => p + c.money, 0);
-    const avgCMB = totalCMB / days;
+  const { start, end } = ds.state;
+  const startDate = moment(start).format('MM-DD');
+  const endDate = moment(end).format('MM-DD');
+  const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
+  const total = data
+    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
+    .reduce((p, c) => p + c.total, 0);
+  const avg = total / days;
+  const totalAli = data
+    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
+    .reduce((p, c) => p + c.money, 0);
+  const avgAli = totalAli / days;
+  const totalCMB = data
+    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'CMB')
+    .reduce((p, c) => p + c.money, 0);
+  const avgCMB = totalCMB / days;
 
-    const Money = (money: number) => (
-      <span style={{ color: money > 0 ? '#f5222d' : '#52c41a' }}>
-        {numeral(money).format('0.00')}
+  const Money = (money: number) => (
+    <span style={{ color: money > 0 ? '#f5222d' : '#52c41a' }}>
+      {numeral(money).format('0.00')}
+    </span>
+  );
+
+  const Analysis = () => (
+    <p>
+      <span>
+        {startDate} ~ {endDate} ({days}天){' '}
       </span>
-    );
-
-    return (
-      <p>
-        <span>
-          {startDate} ~ {endDate} ({days}天){' '}
-        </span>
-        <span>
-          总收益 {Money(total)}，平均每天收益 {Money(avg)}，
-        </span>
-        <span>
-          Alipay收益 {Money(totalAli)}，平均每天收益 {Money(avgAli)}，
-        </span>
-        <span>
-          CMB收益 {Money(totalCMB)}，平均每天收益 {Money(avgCMB)}
-        </span>
-      </p>
-    );
-  };
+      <span>
+        总收益 {Money(total)}，日均 {Money(avg)}，
+      </span>
+      <span>
+        Alipay收益 {Money(totalAli)}，日均 {Money(avgAli)}，
+      </span>
+      <span>
+        CMB收益 {Money(totalCMB)}，日均 {Money(avgCMB)}
+      </span>
+    </p>
+  );
 
   return (
     <div style={{ height: height + 100 }}>
@@ -186,6 +189,46 @@ const GainsChart: React.FC<GainsChartProps> = props => {
                   fontWeight: 'normal',
                 },
                 content: '',
+              }}
+            />
+            <Guide.Line
+              start={['min', avgAli]}
+              end={['max', avgAli]}
+              lineStyle={{
+                stroke: color.alipay,
+                lineWidth: 1,
+                lineDash: [3, 5],
+              }}
+              text={{
+                position: 'end',
+                offsetX: 6,
+                offsetY: 6,
+                style: {
+                  fill: color.alipay,
+                  fontSize: 12,
+                  fontWeight: 'normal',
+                },
+                content: 'Alipay日均',
+              }}
+            />
+            <Guide.Line
+              start={['min', avgCMB]}
+              end={['max', avgCMB]}
+              lineStyle={{
+                stroke: color.cmb,
+                lineWidth: 1,
+                lineDash: [5, 3],
+              }}
+              text={{
+                position: 'end',
+                offsetX: 6,
+                offsetY: 6,
+                style: {
+                  fill: color.cmb,
+                  fontSize: 12,
+                  fontWeight: 'normal',
+                },
+                content: 'CMB日均',
               }}
             />
           </Guide>
