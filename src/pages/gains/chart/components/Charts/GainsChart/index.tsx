@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Chart, Geom, Axis, Tooltip, Label, Legend, Guide } from 'bizcharts';
 import numeral from 'numeral';
 import DataSet from '@antv/data-set';
@@ -19,226 +19,221 @@ export interface GainsChartProps {
   height?: number;
 }
 
-const GainsChart: React.FC<GainsChartProps> = props => {
-  const {
-    title,
-    height = 400,
-    padding = [60, 80, 80, 40] as [number, number, number, number],
-    data: sourceData,
-  } = props;
+interface GainsChartState {
+  data: {
+    date: number;
+    channel: string;
+    money: number;
+    total: number;
+  }[];
+  showAlipayAvgLine: boolean;
+}
 
-  const data =
-    Array.isArray(sourceData) && sourceData.length > 0
-      ? sourceData
-      : [{ date: 0, channel: '', money: 0, total: 0 }];
+class GainsChart extends Component<GainsChartProps, GainsChartState> {
+  constructor(props: GainsChartProps) {
+    super(props);
+    const { data: sourceData } = props;
+    const data =
+      Array.isArray(sourceData) && sourceData.length > 0
+        ? sourceData
+        : [{ date: 0, channel: '', money: 0, total: 0 }];
 
-  data.sort((a, b) => a.date - b.date);
+    data.sort((a, b) => a.date - b.date);
 
-  let max = 0;
-  let min = 0;
-  if (data[0] && data[0].money) {
-    min = [...data].sort((a, b) => a.money - b.money)[0].money;
-    max = [...data].sort((a, b) => b.money - a.money)[0].money;
+    this.state = {
+      data,
+      showAlipayAvgLine: true,
+    };
   }
 
-  const ds = new DataSet({
-    state: {
-      start: data[0].date,
-      end: data[data.length - 1].date,
-    },
-  });
+  color = {
+    alipay: '#1977fd',
+    cmb: '#d81e06',
+  };
 
-  const dv = ds.createView();
-  dv.source(data).transform({
-    type: 'filter',
-    callback: (obj: { date: string }) => {
-      const { date } = obj;
-      return date <= ds.state.end && date >= ds.state.start;
-    },
-  });
-
-  const timeScale = {
+  timeScale = {
     type: 'time',
     // tickInterval: 60 * 60 * 1000,
     mask: 'MM-DD',
     range: [0, 1],
   };
 
-  const cols = {
-    date: timeScale,
-    money: {
-      max,
-      min,
-    },
+  cols = {
+    date: this.timeScale,
   };
 
-  const color = {
-    alipay: '#1977fd',
-    cmb: '#d81e06',
-  };
-
-  const SliderGen = () => (
-    <Slider
-      padding={[0, padding[1] + 20, 0, padding[3]]}
-      width="auto"
-      height={26}
-      xAxis="date"
-      yAxis="total"
-      scales={{ date: timeScale }}
-      data={data}
-      start={ds.state.start}
-      end={ds.state.end}
-      backgroundChart={{ type: 'line' }}
-      onChange={({ startValue, endValue }: { startValue: string; endValue: string }) => {
-        ds.setState('start', startValue);
-        ds.setState('end', endValue);
+  renderAvgLine = (avg: number, channel: string) => (
+    <Guide.Line
+      start={['min', avg]}
+      end={['max', avg]}
+      lineStyle={{
+        stroke: this.color[channel],
+        lineWidth: 1,
+        lineDash: [3, 5],
+      }}
+      text={{
+        position: 'end',
+        offsetX: 6,
+        offsetY: 6,
+        style: {
+          fill: this.color[channel],
+          fontSize: 12,
+          fontWeight: 'normal',
+        },
+        content: `${channel === 'alipay' ? 'Alipay' : 'CMB'}日均`,
       }}
     />
   );
 
-  const { start, end } = ds.state;
-  const startDate = moment(start).format('MM-DD');
-  const endDate = moment(end).format('MM-DD');
-  const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
-  const total = data
-    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-    .reduce((p, c) => p + c.total, 0);
-  const avg = total / days;
-  const totalAli = data
-    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-    .reduce((p, c) => p + c.money, 0);
-  const avgAli = totalAli / days;
-  const totalCMB = data
-    .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'CMB')
-    .reduce((p, c) => p + c.money, 0);
-  const avgCMB = totalCMB / days;
+  render() {
+    const {
+      title,
+      height = 400,
+      padding = [60, 80, 80, 40] as [number, number, number, number],
+    } = this.props;
+    const { data } = this.state;
 
-  const Money = (money: number) => (
-    <span style={{ color: money > 0 ? '#f5222d' : '#52c41a' }}>
-      {numeral(money).format('0.00')}
-    </span>
-  );
+    const ds = new DataSet({
+      state: {
+        start: data[0].date,
+        end: data[data.length - 1].date,
+      },
+    });
 
-  const Analysis = () => (
-    <p>
-      <span>
-        {startDate} ~ {endDate} ({days}天){' '}
-      </span>
-      <span>
-        总收益 {Money(total)}，日均 {Money(avg)}，
-      </span>
-      <span>
-        Alipay收益 {Money(totalAli)}，日均 {Money(avgAli)}，
-      </span>
-      <span>
-        CMB收益 {Money(totalCMB)}，日均 {Money(avgCMB)}
-      </span>
-    </p>
-  );
+    const dv = ds.createView();
+    dv.source(data).transform({
+      type: 'filter',
+      callback: (obj: { date: string }) => {
+        const { date } = obj;
+        return date <= ds.state.end && date >= ds.state.start;
+      },
+    });
 
-  return (
-    <div style={{ height: height + 100 }}>
-      <div>
-        {title && <h4>{title}</h4>}
-        <Analysis />
-        <Chart height={height} padding={padding} data={dv} scale={cols} forceFit>
-          <Legend />
-          <Axis name="date" />
-          <Axis name="money" />
-          <Tooltip />
-          <Geom
-            type="line"
-            position="date*money"
-            color={[
-              'channel',
-              channel => {
-                if (channel === 'Alipay') {
-                  return '#1977fd';
-                }
-                return '#d81e06';
-              },
-            ]}
-            style={{
-              stroke: '#fff',
-              lineWidth: 1,
-            }}
-          >
-            <Label
-              content={['total', value => numeral(value).format('0.00')]}
-              // eslint-disable-next-line
-              formatter={(text, item) => (item._origin.channel === 'CMB' ? null : text)}
-              textStyle={text => ({
-                fill: text > 0 ? '#f5222d' : '#52c41a',
-              })}
-            />
-          </Geom>
-          <Guide>
-            <Guide.Line
-              start={['min', 0]}
-              end={['max', 0]}
-              lineStyle={{
-                stroke: '#f00',
-                lineWidth: 1,
-                lineDash: [3, 3],
-              }}
-              text={{
-                position: 'start',
-                style: {
-                  fill: '#f00',
-                  fontSize: 12,
-                  fontWeight: 'normal',
+    const SliderGen = () => (
+      <Slider
+        padding={[0, padding[1] + 20, 0, padding[3]]}
+        width="auto"
+        height={26}
+        xAxis="date"
+        yAxis="total"
+        scales={{ date: this.timeScale }}
+        data={data}
+        start={ds.state.start}
+        end={ds.state.end}
+        backgroundChart={{ type: 'line' }}
+        onChange={({ startValue, endValue }: { startValue: string; endValue: string }) => {
+          ds.setState('start', startValue);
+          ds.setState('end', endValue);
+        }}
+      />
+    );
+
+    const { start, end } = ds.state;
+    const startDate = moment(start).format('MM-DD');
+    const endDate = moment(end).format('MM-DD');
+    const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
+    const total = data
+      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
+      .reduce((p, c) => p + c.total, 0);
+    const avg = total / days;
+    const totalAli = data
+      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
+      .reduce((p, c) => p + c.money, 0);
+    const avgAli = totalAli / days;
+    const totalCMB = data
+      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'CMB')
+      .reduce((p, c) => p + c.money, 0);
+    const avgCMB = totalCMB / days;
+
+    const Money = (money: number) => (
+      <span style={{ color: money > 0 ? '#f5222d' : '#52c41a' }}>
+        {numeral(money).format('0.00')}
+      </span>
+    );
+
+    const Analysis = () => (
+      <p>
+        <span>
+          {startDate} ~ {endDate} ({days}天){' '}
+        </span>
+        <span>
+          总收益 {Money(total)}，日均 {Money(avg)}，
+        </span>
+        <span>
+          Alipay收益 {Money(totalAli)}，日均 {Money(avgAli)}，
+        </span>
+        <span>
+          CMB收益 {Money(totalCMB)}，日均 {Money(avgCMB)}
+        </span>
+      </p>
+    );
+
+    return (
+      <div style={{ height: height + 100 }}>
+        <div>
+          {title && <h4>{title}</h4>}
+          <Analysis />
+          <Chart height={height} padding={padding} data={dv} scale={this.cols} forceFit>
+            <Legend />
+            <Axis name="date" />
+            <Axis name="money" />
+            <Tooltip />
+            <Geom
+              type="line"
+              position="date*money"
+              color={[
+                'channel',
+                channel => {
+                  if (channel === 'Alipay') {
+                    return '#1977fd';
+                  }
+                  return '#d81e06';
                 },
-                content: '',
-              }}
-            />
-            <Guide.Line
-              start={['min', avgAli]}
-              end={['max', avgAli]}
-              lineStyle={{
-                stroke: color.alipay,
+              ]}
+              style={{
+                stroke: '#fff',
                 lineWidth: 1,
-                lineDash: [3, 5],
               }}
-              text={{
-                position: 'end',
-                offsetX: 6,
-                offsetY: 6,
-                style: {
-                  fill: color.alipay,
-                  fontSize: 12,
-                  fontWeight: 'normal',
-                },
-                content: 'Alipay日均',
-              }}
-            />
-            <Guide.Line
-              start={['min', avgCMB]}
-              end={['max', avgCMB]}
-              lineStyle={{
-                stroke: color.cmb,
-                lineWidth: 1,
-                lineDash: [5, 3],
-              }}
-              text={{
-                position: 'end',
-                offsetX: 6,
-                offsetY: 6,
-                style: {
-                  fill: color.cmb,
-                  fontSize: 12,
-                  fontWeight: 'normal',
-                },
-                content: 'CMB日均',
-              }}
-            />
-          </Guide>
-        </Chart>
-        <div style={{ marginRight: -20 }}>
-          <SliderGen />
+            >
+              <Label
+                content={['total', value => numeral(value).format('0.00')]}
+                // eslint-disable-next-line
+                formatter={(text, item) => (item._origin.channel === 'CMB' ? null : text)}
+                textStyle={text => ({
+                  fill: text > 0 ? '#f5222d' : '#52c41a',
+                })}
+              />
+            </Geom>
+            <Guide>
+              <Guide.Line
+                start={['min', 0]}
+                end={['max', 0]}
+                lineStyle={{
+                  stroke: '#f00',
+                  lineWidth: 1,
+                  lineDash: [3, 3],
+                }}
+                text={{
+                  position: 'start',
+                  style: {
+                    fill: '#f00',
+                    fontSize: 12,
+                    fontWeight: 'normal',
+                  },
+                  content: '',
+                }}
+              />
+              {this.state.showAlipayAvgLine && this.renderAvgLine(avgAli, 'alipay')}
+              {this.renderAvgLine(avgCMB, 'cmb')}
+            </Guide>
+          </Chart>
+          <div style={{ marginRight: -20 }}>
+            <SliderGen />
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default autoHeight()(GainsChart);
