@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Chart, Geom, Axis, Tooltip, Label, Legend, Guide } from 'bizcharts';
+import { Button } from 'antd';
 import numeral from 'numeral';
 import DataSet from '@antv/data-set';
 import Slider from 'bizcharts-plugin-slider';
@@ -7,29 +8,46 @@ import moment from 'moment';
 
 import autoHeight from '../autoHeight';
 
+interface DataItem {
+  date: number;
+  channel: string;
+  money: number;
+  total: number;
+}
+
 export interface GainsChartProps {
-  data: {
-    date: number;
-    channel: string;
-    money: number;
-    total: number;
-  }[];
+  data: DataItem[];
   title?: string;
   padding?: [number, number, number, number];
   height?: number;
 }
 
 interface GainsChartState {
-  data: {
-    date: number;
-    channel: string;
-    money: number;
-    total: number;
-  }[];
+  data: DataItem[];
+  dateRange: [number, number];
   showAlipayAvgLine: boolean;
+  showCMBAvgLine: boolean;
 }
 
 class GainsChart extends Component<GainsChartProps, GainsChartState> {
+  color = {
+    alipay: '#1977fd',
+    cmb: '#d81e06',
+    gains: '#f5222d',
+    loss: '#52c41a',
+  };
+
+  timeScale = {
+    type: 'time',
+    // tickInterval: 60 * 60 * 1000,
+    mask: 'MM-DD',
+    range: [0, 1],
+  };
+
+  cols = {
+    date: this.timeScale,
+  };
+
   constructor(props: GainsChartProps) {
     super(props);
     const { data: sourceData } = props;
@@ -42,24 +60,83 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
 
     this.state = {
       data,
+      dateRange: [data[0].date, data[data.length - 1].date],
       showAlipayAvgLine: true,
+      showCMBAvgLine: true,
     };
   }
 
-  color = {
-    alipay: '#1977fd',
-    cmb: '#d81e06',
+  handleToggle = (channel: string) => {
+    if (channel === 'Alipay') {
+      const show = this.state.showAlipayAvgLine;
+      this.setState({
+        showAlipayAvgLine: !show,
+      });
+    } else {
+      const show = this.state.showCMBAvgLine;
+      this.setState({
+        showCMBAvgLine: !show,
+      });
+    }
   };
 
-  timeScale = {
-    type: 'time',
-    // tickInterval: 60 * 60 * 1000,
-    mask: 'MM-DD',
-    range: [0, 1],
+  renderMoney = (money: number) => (
+    <span style={{ color: money > 0 ? this.color.gains : this.color.loss }}>
+      {numeral(money).format('0.00')}
+    </span>
+  );
+
+  renderChannelAnalysis = (channel: string, days: number) => {
+    const [start, end] = this.state.dateRange;
+    const { data } = this.state;
+    const show = channel === 'Alipay' ? this.state.showAlipayAvgLine : this.state.showCMBAvgLine;
+    const total = data
+      .filter(
+        (item: DataItem) => item.date >= start && item.date <= end && item.channel === channel,
+      )
+      .reduce((p: number, c: DataItem) => p + c.money, 0);
+    const avg = total / days;
+
+    return (
+      <span>
+        {channel}收益 {this.renderMoney(total)}，日均 {this.renderMoney(avg)}
+        <Button
+          size="small"
+          type="primary"
+          style={{ margin: '0px 5px' }}
+          onClick={() => this.handleToggle(channel)}
+        >
+          {show ? '隐藏描线' : '显示描线'}
+        </Button>
+      </span>
+    );
   };
 
-  cols = {
-    date: this.timeScale,
+  renderAnalysis = () => {
+    const [start, end] = this.state.dateRange;
+    const { data } = this.state;
+    const startDate = moment(start).format('MM-DD');
+    const endDate = moment(end).format('MM-DD');
+    const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
+    const total = data
+      .filter(
+        (item: DataItem) => item.date >= start && item.date <= end && item.channel === 'Alipay',
+      )
+      .reduce((p: number, c: DataItem) => p + c.total, 0);
+    const avg = total / days;
+
+    return (
+      <p>
+        <span>
+          {startDate} ~ {endDate} ({days}天){' '}
+        </span>
+        <span>
+          总收益 {this.renderMoney(total)}，日均 {this.renderMoney(avg)}，
+        </span>
+        {this.renderChannelAnalysis('Alipay', days)}
+        {this.renderChannelAnalysis('CMB', days)}
+      </p>
+    );
   };
 
   renderAvgLine = (avg: number, channel: string) => (
@@ -91,7 +168,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
       height = 400,
       padding = [60, 80, 80, 40] as [number, number, number, number],
     } = this.props;
-    const { data } = this.state;
+    const { data, showAlipayAvgLine, showCMBAvgLine } = this.state;
 
     const ds = new DataSet({
       state: {
@@ -124,55 +201,31 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
         onChange={({ startValue, endValue }: { startValue: string; endValue: string }) => {
           ds.setState('start', startValue);
           ds.setState('end', endValue);
+          this.setState({
+            dateRange: [moment(startValue).valueOf(), moment(endValue).valueOf()],
+          });
         }}
       />
     );
 
-    const { start, end } = ds.state;
-    const startDate = moment(start).format('MM-DD');
-    const endDate = moment(end).format('MM-DD');
+    const [start, end] = this.state.dateRange;
     const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
-    const total = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-      .reduce((p, c) => p + c.total, 0);
-    const avg = total / days;
     const totalAli = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'Alipay')
-      .reduce((p, c) => p + c.money, 0);
+      .filter(
+        (item: DataItem) => item.date >= start && item.date <= end && item.channel === 'Alipay',
+      )
+      .reduce((p: number, c: DataItem) => p + c.money, 0);
     const avgAli = totalAli / days;
     const totalCMB = data
-      .filter((item: any) => item.date >= start && item.date <= end && item.channel === 'CMB')
-      .reduce((p, c) => p + c.money, 0);
+      .filter((item: DataItem) => item.date >= start && item.date <= end && item.channel === 'CMB')
+      .reduce((p: number, c: DataItem) => p + c.money, 0);
     const avgCMB = totalCMB / days;
-
-    const Money = (money: number) => (
-      <span style={{ color: money > 0 ? '#f5222d' : '#52c41a' }}>
-        {numeral(money).format('0.00')}
-      </span>
-    );
-
-    const Analysis = () => (
-      <p>
-        <span>
-          {startDate} ~ {endDate} ({days}天){' '}
-        </span>
-        <span>
-          总收益 {Money(total)}，日均 {Money(avg)}，
-        </span>
-        <span>
-          Alipay收益 {Money(totalAli)}，日均 {Money(avgAli)}，
-        </span>
-        <span>
-          CMB收益 {Money(totalCMB)}，日均 {Money(avgCMB)}
-        </span>
-      </p>
-    );
 
     return (
       <div style={{ height: height + 100 }}>
         <div>
           {title && <h4>{title}</h4>}
-          <Analysis />
+          {this.renderAnalysis()}
           <Chart height={height} padding={padding} data={dv} scale={this.cols} forceFit>
             <Legend />
             <Axis name="date" />
@@ -223,8 +276,8 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
                   content: '',
                 }}
               />
-              {this.state.showAlipayAvgLine && this.renderAvgLine(avgAli, 'alipay')}
-              {this.renderAvgLine(avgCMB, 'cmb')}
+              {showAlipayAvgLine && this.renderAvgLine(avgAli, 'alipay')}
+              {showCMBAvgLine && this.renderAvgLine(avgCMB, 'cmb')}
             </Guide>
           </Chart>
           <div style={{ marginRight: -20 }}>
