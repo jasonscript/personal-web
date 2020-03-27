@@ -85,8 +85,8 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     this.state = {
       data,
       dateRange: [start, end],
-      showAlipayAvgLine: true,
-      showCMBAvgLine: true,
+      showAlipayAvgLine: false,
+      showCMBAvgLine: false,
     };
   }
 
@@ -258,9 +258,9 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
                 'channel',
                 channel => {
                   if (channel === 'Alipay') {
-                    return '#1977fd';
+                    return this.color.alipay;
                   }
-                  return '#d81e06';
+                  return this.color.cmb;
                 },
               ]}
               style={{
@@ -273,7 +273,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
                 // eslint-disable-next-line
                 formatter={(text, item) => (item._origin.channel === 'CMB' ? null : text)}
                 textStyle={text => ({
-                  fill: text > 0 ? '#f5222d' : '#52c41a',
+                  fill: text > 0 ? this.color.gains : this.color.loss,
                 })}
               />
             </Geom>
