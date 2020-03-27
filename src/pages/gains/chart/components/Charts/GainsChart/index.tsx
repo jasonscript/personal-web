@@ -5,6 +5,7 @@ import numeral from 'numeral';
 import DataSet from '@antv/data-set';
 import Slider from 'bizcharts-plugin-slider';
 import moment from 'moment';
+import Debounce from 'lodash.debounce';
 
 import autoHeight from '../autoHeight';
 
@@ -48,6 +49,15 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     date: this.timeScale,
   };
 
+  ds = new DataSet({
+    state: {
+      start: 0,
+      end: 0,
+    },
+  });
+
+  dv = this.ds.createView();
+
   constructor(props: GainsChartProps) {
     super(props);
     const { data: sourceData } = props;
@@ -58,9 +68,23 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
 
     data.sort((a, b) => a.date - b.date);
 
+    const start = data[0].date;
+    const end = data[data.length - 1].date;
+
+    this.ds.setState('start', start);
+    this.ds.setState('end', end);
+
+    this.dv.source(data).transform({
+      type: 'filter',
+      callback: (obj: { date: string }) => {
+        const { date } = obj;
+        return date <= this.ds.state.end && date >= this.ds.state.start;
+      },
+    });
+
     this.state = {
       data,
-      dateRange: [data[0].date, data[data.length - 1].date],
+      dateRange: [start, end],
       showAlipayAvgLine: true,
       showCMBAvgLine: true,
     };
@@ -79,6 +103,20 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
       });
     }
   };
+
+  handleSliderChange = Debounce(
+    ({ startValue, endValue }: { startValue: number; endValue: number }) => {
+      this.ds.setState('start', startValue);
+      this.ds.setState('end', endValue);
+      this.setState({
+        dateRange: [
+          moment(moment(startValue).format('YYYY-MM-DD')).valueOf(),
+          moment(moment(endValue).format('YYYY-MM-DD')).valueOf(),
+        ],
+      });
+    },
+    500,
+  );
 
   renderMoney = (money: number) => (
     <span style={{ color: money > 0 ? this.color.gains : this.color.loss }}>
@@ -162,31 +200,10 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     />
   );
 
-  render() {
-    const {
-      title,
-      height = 400,
-      padding = [60, 80, 80, 40] as [number, number, number, number],
-    } = this.props;
-    const { data, showAlipayAvgLine, showCMBAvgLine } = this.state;
-
-    const ds = new DataSet({
-      state: {
-        start: data[0].date,
-        end: data[data.length - 1].date,
-      },
-    });
-
-    const dv = ds.createView();
-    dv.source(data).transform({
-      type: 'filter',
-      callback: (obj: { date: string }) => {
-        const { date } = obj;
-        return date <= ds.state.end && date >= ds.state.start;
-      },
-    });
-
-    const SliderGen = () => (
+  renderSlider = () => {
+    const { padding = [60, 80, 80, 40] as [number, number, number, number] } = this.props;
+    const { data } = this.state;
+    return (
       <Slider
         padding={[0, padding[1] + 20, 0, padding[3]]}
         width="auto"
@@ -195,18 +212,21 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
         yAxis="total"
         scales={{ date: this.timeScale }}
         data={data}
-        start={ds.state.start}
-        end={ds.state.end}
+        start={this.ds.state.start}
+        end={this.ds.state.end}
         backgroundChart={{ type: 'line' }}
-        onChange={({ startValue, endValue }: { startValue: string; endValue: string }) => {
-          ds.setState('start', startValue);
-          ds.setState('end', endValue);
-          this.setState({
-            dateRange: [moment(startValue).valueOf(), moment(endValue).valueOf()],
-          });
-        }}
+        onChange={this.handleSliderChange}
       />
     );
+  };
+
+  render() {
+    const {
+      title,
+      height = 400,
+      padding = [60, 80, 80, 40] as [number, number, number, number],
+    } = this.props;
+    const { data, showAlipayAvgLine, showCMBAvgLine } = this.state;
 
     const [start, end] = this.state.dateRange;
     const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
@@ -226,7 +246,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
         <div>
           {title && <h4>{title}</h4>}
           {this.renderAnalysis()}
-          <Chart height={height} padding={padding} data={dv} scale={this.cols} forceFit>
+          <Chart height={height} padding={padding} data={this.dv} scale={this.cols} forceFit>
             <Legend />
             <Axis name="date" />
             <Axis name="money" />
@@ -280,9 +300,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
               {showCMBAvgLine && this.renderAvgLine(avgCMB, 'cmb')}
             </Guide>
           </Chart>
-          <div style={{ marginRight: -20 }}>
-            <SliderGen />
-          </div>
+          <div style={{ marginRight: -20 }}>{this.renderSlider()}</div>
         </div>
       </div>
     );
