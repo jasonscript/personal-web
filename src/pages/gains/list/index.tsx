@@ -5,7 +5,7 @@ import {
   CaretUpOutlined,
   CaretDownOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Select, message } from 'antd';
+import { Button, Form, Radio, message } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
@@ -70,10 +70,10 @@ const TableList: React.FC<{}> = () => {
       ],
       renderFormItem: () => (
         <Form.Item name="name">
-          <Select>
-            <Select.Option value="Jason">Jason</Select.Option>
-            <Select.Option value="Qier">Qier</Select.Option>
-          </Select>
+          <Radio.Group>
+            <Radio value="Jason">Jason</Radio>
+            <Radio value="Qier">Qier</Radio>
+          </Radio.Group>
         </Form.Item>
       ),
     },
@@ -98,14 +98,17 @@ const TableList: React.FC<{}> = () => {
       ),
       renderFormItem: () => (
         <Form.Item name="channel">
-          <Select>
-            <Select.Option value="Alipay">
-              <AlipayOutlined style={{ color: '#1977fd', fontSize: 20 }} />
-            </Select.Option>
-            <Select.Option value="CMB">
-              <IconFont type="iconcmb" style={{ color: '#d81e06', fontSize: 20 }} />
-            </Select.Option>
-          </Select>
+          <Radio.Group>
+            <Radio
+              value="Alipay"
+              style={{ display: 'inline-flex', alignItems: 'center', marginRight: 20 }}
+            >
+              <AlipayOutlined style={{ color: '#1977fd', fontSize: 24 }} />
+            </Radio>
+            <Radio value="CMB" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <IconFont type="iconcmb" style={{ color: '#d81e06', fontSize: 24 }} />
+            </Radio>
+          </Radio.Group>
         </Form.Item>
       ),
     },
