@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Select, InputNumber, message } from 'antd';
+import { Button, Form, Radio, InputNumber, message } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
@@ -63,10 +63,10 @@ const TableList: React.FC<{}> = () => {
       ],
       renderFormItem: () => (
         <Form.Item name="name">
-          <Select>
-            <Select.Option value="Jason">Jason</Select.Option>
-            <Select.Option value="Qier">Qier</Select.Option>
-          </Select>
+          <Radio.Group>
+            <Radio value="Jason">Jason</Radio>
+            <Radio value="Qier">Qier</Radio>
+          </Radio.Group>
         </Form.Item>
       ),
     },
