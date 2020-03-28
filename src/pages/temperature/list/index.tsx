@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Radio, InputNumber, message } from 'antd';
+import { Button, Form, Radio, Slider, message } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
@@ -26,6 +26,23 @@ const handleAdd = async (fields: TableListItem) => {
     message.error('添加失败请重试！');
     return false;
   }
+};
+
+const marks = {
+  35: '35°C',
+  36: '36°C',
+  37.3: {
+    style: {
+      color: '#f50',
+    },
+    label: <strong>37.3°C</strong>,
+  },
+  40: {
+    style: {
+      color: '#f50',
+    },
+    label: <strong>40°C</strong>,
+  },
 };
 
 const TableList: React.FC<{}> = () => {
@@ -80,10 +97,10 @@ const TableList: React.FC<{}> = () => {
           message: '温度为必填项',
         },
       ],
-      renderText: (val: number) => `${val}℃`,
+      renderText: (val: number) => `${val}°C`,
       renderFormItem: () => (
         <Form.Item name="value">
-          <InputNumber step="0.1" />
+          <Slider min={35} max={40} marks={marks} step={0.1} tooltipVisible />
         </Form.Item>
       ),
     },
