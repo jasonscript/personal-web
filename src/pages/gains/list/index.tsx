@@ -13,7 +13,7 @@ import moment from 'moment';
 
 import CreateForm from './components/CreateForm';
 import { TableListItem } from './data.d';
-import { queryGains, addGains } from './service';
+import { queryGains, addGains, checkGains } from './service';
 
 const IconFont = createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_1688330_dmpevidkpun.js',
@@ -86,6 +86,24 @@ const TableList: React.FC<{}> = () => {
           required: true,
           message: '渠道为必填项',
         },
+        ({ getFieldValue }) => ({
+          async validator(rule, value) {
+            const date = getFieldValue('date');
+            if (!date) {
+              return Promise.resolve();
+            }
+            const params = {
+              date: moment(date).format('YYYY-MM-DD'),
+              name: getFieldValue('name'),
+              channel: value,
+            };
+            const res = await checkGains(params);
+            if (res) {
+              return Promise.reject(new Error('重复记录'));
+            }
+            return Promise.resolve();
+          },
+        }),
       ],
       render: (text, record) => (
         <span>

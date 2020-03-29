@@ -39,3 +39,15 @@ export async function updateRule(params: TableListParams) {
     },
   });
 }
+
+export async function checkGains(params: { date: string; name: string; channel: string }) {
+  return request('/api-local/gains/check', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
+  });
+}
