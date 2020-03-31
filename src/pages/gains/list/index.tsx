@@ -55,6 +55,23 @@ const TableList: React.FC<{}> = () => {
           required: true,
           message: '日期为必填项',
         },
+        ({ getFieldValue }) => ({
+          async validator(rule, value) {
+            if (!value) {
+              return Promise.resolve();
+            }
+            const params = {
+              date: value.format('YYYY-MM-DD'),
+              name: getFieldValue('name'),
+              channel: getFieldValue('channel'),
+            };
+            const res = await checkGains(params);
+            if (res) {
+              return Promise.reject(new Error('重复记录'));
+            }
+            return Promise.resolve();
+          },
+        }),
       ],
       valueType: 'date',
     },
@@ -86,24 +103,6 @@ const TableList: React.FC<{}> = () => {
           required: true,
           message: '渠道为必填项',
         },
-        ({ getFieldValue }) => ({
-          async validator(rule, value) {
-            const date = getFieldValue('date');
-            if (!date) {
-              return Promise.resolve();
-            }
-            const params = {
-              date: moment(date).format('YYYY-MM-DD'),
-              name: getFieldValue('name'),
-              channel: value,
-            };
-            const res = await checkGains(params);
-            if (res) {
-              return Promise.reject(new Error('重复记录'));
-            }
-            return Promise.resolve();
-          },
-        }),
       ],
       render: (text, record) => (
         <span>
