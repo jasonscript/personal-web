@@ -150,6 +150,25 @@ export default {
                 },
               ],
             },
+            /* {
+              path: '/steps',
+              name: 'steps',
+              icon: 'aim',
+              routes: []
+            }, */
+            {
+              path: '/todolist',
+              name: 'todolist',
+              icon: 'schedule',
+              routes: [
+                {
+                  name: 'list',
+                  icon: 'unordered-list',
+                  path: '/todolist/list',
+                  component: './todolist/list',
+                },
+              ],
+            },
             {
               path: '/',
               redirect: '/temperature/list',

@@ -55,4 +55,7 @@ export default {
   'menu.gains': '收益',
   'menu.gains.list': '收益表格',
   'menu.gains.chart': '收益曲线',
+  'menu.steps': '步数',
+  'menu.todolist': '待办清单',
+  'menu.todolist.list': '待办列表',
 };
