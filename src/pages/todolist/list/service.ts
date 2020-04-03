@@ -38,16 +38,14 @@ export async function addTodo(params: ParamsType) {
   });
 }
 
-export async function updateFakeList(params: ParamsType) {
-  const { count = 5, ...restParams } = params;
-  return request('/api/fake_list', {
+export async function updateStatus({ id, status }: { id: number; status: number }) {
+  return request(`/api-local/todolist/${id}`, {
     method: 'POST',
-    params: {
-      count,
-    },
     data: {
-      ...restParams,
-      method: 'update',
+      status,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
     },
   });
 }

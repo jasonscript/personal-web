@@ -62,10 +62,25 @@ export const TodoList: FC<ListProps> = props => {
   const [visible, setVisible] = useState<boolean>(false);
   const [current, setCurrent] = useState<Partial<TodoItemDataType> | undefined>(undefined);
 
-  useEffect(() => {
+  const toFetch = () => {
     dispatch({
       type: 'todolist/fetch',
     });
+  };
+
+  const updateStatus = async (item: TodoItemDataType) => {
+    await dispatch({
+      type: 'todolist/submit',
+      payload: {
+        id: item.id,
+        status: item.status === 'default' ? 1 : 2,
+      },
+    });
+    toFetch();
+  };
+
+  useEffect(() => {
+    toFetch();
   }, [1]);
 
   const paginationProps = {
@@ -147,9 +162,7 @@ export const TodoList: FC<ListProps> = props => {
     setDone(false);
     setVisible(false);
 
-    dispatch({
-      type: 'todolist/fetch',
-    });
+    toFetch();
   };
 
   const handleCancel = () => {
@@ -212,15 +225,17 @@ export const TodoList: FC<ListProps> = props => {
               renderItem={item => (
                 <List.Item
                   actions={[
-                    <a
-                      key="edit"
-                      onClick={e => {
-                        e.preventDefault();
-                        showEditModal(item);
-                      }}
-                    >
-                      编辑
-                    </a>,
+                    item.status !== 'success' && (
+                      <a
+                        key="start"
+                        onClick={e => {
+                          e.preventDefault();
+                          updateStatus(item);
+                        }}
+                      >
+                        {item.status === 'default' ? '开始' : '完成'}
+                      </a>
+                    ),
                     <MoreBtn key="more" item={item} />,
                   ]}
                 >
