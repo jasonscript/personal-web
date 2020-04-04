@@ -43,8 +43,8 @@ export interface AnalysisData {
 
 export interface GainsDataType {
   date: number;
-  channel: string;
-  money: number;
+  alipay: number;
+  cmb: number;
   total: number;
 }
 

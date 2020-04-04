@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Chart, Geom, Axis, Tooltip, Label, Legend, Guide } from 'bizcharts';
+import { Chart, Geom, Axis, Tooltip, Legend, Guide } from 'bizcharts';
 import { Button } from 'antd';
 import numeral from 'numeral';
 import DataSet from '@antv/data-set';
@@ -8,23 +8,17 @@ import moment from 'moment';
 import Debounce from 'lodash.debounce';
 
 import autoHeight from '../autoHeight';
-
-interface DataItem {
-  date: number;
-  channel: string;
-  money: number;
-  total: number;
-}
+import { GainsDataType } from '../../../data.d';
 
 export interface GainsChartProps {
-  data: DataItem[];
+  data: GainsDataType[];
   title?: string;
   padding?: [number, number, number, number];
   height?: number;
 }
 
 interface GainsChartState {
-  data: DataItem[];
+  data: GainsDataType[];
   dateRange: [number, number];
   showAlipayAvgLine: boolean;
   showCMBAvgLine: boolean;
@@ -64,7 +58,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     const data =
       Array.isArray(sourceData) && sourceData.length > 0
         ? sourceData
-        : [{ date: 0, channel: '', money: 0, total: 0 }];
+        : [{ date: 0, alipay: 0, cmb: 0, total: 0 }];
 
     data.sort((a, b) => a.date - b.date);
 
@@ -74,13 +68,21 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     this.ds.setState('start', start);
     this.ds.setState('end', end);
 
-    this.dv.source(data).transform({
-      type: 'filter',
-      callback: (obj: { date: string }) => {
-        const { date } = obj;
-        return date <= this.ds.state.end && date >= this.ds.state.start;
-      },
-    });
+    this.dv
+      .source(data)
+      .transform({
+        type: 'fold',
+        fields: ['alipay', 'cmb', 'total'],
+        key: 'type', // key字段
+        value: 'value', // value字段
+      })
+      .transform({
+        type: 'filter',
+        callback: (obj: { date: string }) => {
+          const { date } = obj;
+          return date <= this.ds.state.end && date >= this.ds.state.start;
+        },
+      });
 
     this.state = {
       data,
@@ -129,10 +131,8 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     const { data } = this.state;
     const show = channel === 'Alipay' ? this.state.showAlipayAvgLine : this.state.showCMBAvgLine;
     const total = data
-      .filter(
-        (item: DataItem) => item.date >= start && item.date <= end && item.channel === channel,
-      )
-      .reduce((p: number, c: DataItem) => p + c.money, 0);
+      .filter((item: GainsDataType) => item.date >= start && item.date <= end)
+      .reduce((p: number, c: GainsDataType) => p + c[channel.toLowerCase()], 0);
     const avg = total / days;
 
     return (
@@ -157,10 +157,8 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     const endDate = moment(end).format('MM-DD');
     const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
     const total = data
-      .filter(
-        (item: DataItem) => item.date >= start && item.date <= end && item.channel === 'Alipay',
-      )
-      .reduce((p: number, c: DataItem) => p + c.total, 0);
+      .filter((item: GainsDataType) => item.date >= start && item.date <= end)
+      .reduce((p: number, c: GainsDataType) => p + c.total, 0);
     const avg = total / days;
 
     return (
@@ -231,14 +229,12 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
     const [start, end] = this.state.dateRange;
     const days = (end - start) / (24 * 60 * 60 * 1000) + 1;
     const totalAli = data
-      .filter(
-        (item: DataItem) => item.date >= start && item.date <= end && item.channel === 'Alipay',
-      )
-      .reduce((p: number, c: DataItem) => p + c.money, 0);
+      .filter((item: GainsDataType) => item.date >= start && item.date <= end)
+      .reduce((p: number, c: GainsDataType) => p + c.alipay, 0);
     const avgAli = totalAli / days;
     const totalCMB = data
-      .filter((item: DataItem) => item.date >= start && item.date <= end && item.channel === 'CMB')
-      .reduce((p: number, c: DataItem) => p + c.money, 0);
+      .filter((item: GainsDataType) => item.date >= start && item.date <= end)
+      .reduce((p: number, c: GainsDataType) => p + c.cmb, 0);
     const avgCMB = totalCMB / days;
 
     return (
@@ -249,35 +245,38 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
           <Chart height={height} padding={padding} data={this.dv} scale={this.cols} forceFit>
             <Legend />
             <Axis name="date" />
-            <Axis name="money" />
             <Tooltip />
             <Geom
-              type="line"
-              position="date*money"
-              color={[
-                'channel',
-                channel => {
-                  if (channel === 'Alipay') {
-                    return this.color.alipay;
+              type="intervalStack"
+              position="date*value"
+              color="#fff"
+              /* color={[
+                'type',
+                type => {
+                  if (type !== 'total') {
+                    return this.color[type];
                   }
-                  return this.color.cmb;
-                },
-              ]}
+                  return this.color.gains;
+                }
+              ]} */
               style={{
                 stroke: '#fff',
                 lineWidth: 1,
               }}
-            >
-              <Label
-                content={['total', value => numeral(value).format('0.00')]}
-                // eslint-disable-next-line
-                formatter={(text, item) => (item._origin.channel === 'CMB' ? null : text)}
-                textStyle={text => ({
-                  fill: text > 0 ? this.color.gains : this.color.loss,
-                })}
-              />
-            </Geom>
+            />
             <Guide>
+              <Guide.RegionFilter
+                top
+                start={['min', 0]}
+                end={['max', 'min']}
+                color={this.color.loss}
+              />
+              <Guide.RegionFilter
+                top
+                start={['min', 'max']}
+                end={['max', 0]}
+                color={this.color.gains}
+              />
               <Guide.Line
                 start={['min', 0]}
                 end={['max', 0]}

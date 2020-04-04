@@ -9,27 +9,26 @@ export async function fetchGainsData() {
     data.forEach((item: any) => {
       item.date = new Date(item.date).getTime();
     });
-    const jasonData = data.filter((item: any) => item.name === 'Jason');
-    jasonData.forEach((item: any) => {
-      if (item.channel === 'Alipay') {
-        let cmb = 0;
-        cmb = jasonData.find((gain: any) => gain.date === item.date && gain.channel === 'CMB')
-          .money;
-        item.total = item.money + cmb;
-      } else {
-        item.total = item.money;
-      }
+    const jasonGains = data.filter(
+      (item: any) => item.name === 'Jason' && item.channel === 'Alipay',
+    );
+    jasonGains.forEach((item: any) => {
+      item.alipay = item.money;
+      item.cmb = data.find(
+        ({ date, name, channel }: { date: number; name: string; channel: string }) =>
+          date === item.date && name === 'Jason' && channel === 'CMB',
+      ).money;
+      item.total = item.alipay + item.cmb;
     });
-    const qierData = data.filter((item: any) => item.name === 'Qier');
-    qierData.forEach((item: any) => {
-      if (item.channel === 'Alipay') {
-        let cmb = 0;
-        cmb = qierData.find((gain: any) => gain.date === item.date && gain.channel === 'CMB').money;
-        item.total = item.money + cmb;
-      } else {
-        item.total = item.money;
-      }
+    const qierGains = data.filter((item: any) => item.name === 'Qier' && item.channel === 'Alipay');
+    qierGains.forEach((item: any) => {
+      item.alipay = item.money;
+      item.cmb = data.find(
+        ({ date, name, channel }: { date: number; name: string; channel: string }) =>
+          date === item.date && name === 'Qier' && channel === 'CMB',
+      ).money;
+      item.total = item.alipay + item.cmb;
     });
-    return { jasonGains: jasonData, qierGains: qierData };
+    return { jasonGains, qierGains };
   });
 }
