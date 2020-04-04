@@ -177,11 +177,12 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
 
   renderAvgLine = (avg: number, channel: string) => (
     <Guide.Line
+      top
       start={['min', avg]}
       end={['max', avg]}
       lineStyle={{
         stroke: this.color[channel],
-        lineWidth: 1,
+        lineWidth: 2,
         lineDash: [3, 5],
       }}
       text={{
@@ -207,7 +208,7 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
         width="auto"
         height={26}
         xAxis="date"
-        yAxis="total"
+        yAxis="money"
         scales={{ date: this.timeScale }}
         data={data}
         start={this.ds.state.start}
@@ -243,26 +244,22 @@ class GainsChart extends Component<GainsChartProps, GainsChartState> {
           {title && <h4>{title}</h4>}
           {this.renderAnalysis()}
           <Chart height={height} padding={padding} data={this.dv} scale={this.cols} forceFit>
-            <Legend />
+            <Legend visible={false} />
             <Axis name="date" />
             <Tooltip />
             <Geom
-              type="intervalStack"
+              type="area"
               position="date*value"
-              color="#fff"
-              /* color={[
+              shape="smooth"
+              color={[
                 'type',
                 type => {
                   if (type !== 'total') {
                     return this.color[type];
                   }
                   return this.color.gains;
-                }
-              ]} */
-              style={{
-                stroke: '#fff',
-                lineWidth: 1,
-              }}
+                },
+              ]}
             />
             <Guide>
               <Guide.RegionFilter
