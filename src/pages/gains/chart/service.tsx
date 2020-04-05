@@ -18,7 +18,7 @@ export async function fetchGainsData() {
         ({ date, name, channel }: { date: number; name: string; channel: string }) =>
           date === item.date && name === 'Jason' && channel === 'CMB',
       ).money;
-      item.total = (item.alipay + item.cmb).toFixed(2);
+      item.total = Math.floor((item.alipay + item.cmb) * 100) / 100;
     });
     const qierGains = data.filter((item: any) => item.name === 'Qier' && item.channel === 'Alipay');
     qierGains.forEach((item: any) => {
@@ -27,7 +27,7 @@ export async function fetchGainsData() {
         ({ date, name, channel }: { date: number; name: string; channel: string }) =>
           date === item.date && name === 'Qier' && channel === 'CMB',
       ).money;
-      item.total = (item.alipay + item.cmb).toFixed(2);
+      item.total = Math.floor((item.alipay + item.cmb) * 100) / 100;
     });
     return { jasonGains, qierGains };
   });
