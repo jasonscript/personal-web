@@ -143,7 +143,8 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
               }}
             />
           </Guide>
-          <Geom type="line" position="x*value" size={borderWidth} color="key" />
+          <Geom type="line" position="x*value" size={borderWidth} color="key" shape="smooth" />
+          <Geom type="point" position="x*value" color="key" />
         </Chart>
         <div style={{ marginRight: -20 }}>
           <SliderGen />
