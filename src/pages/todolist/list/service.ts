@@ -6,9 +6,15 @@ interface ParamsType extends Partial<TodoItemDataType> {
   count?: number;
 }
 
-export async function query(params: ParamsType) {
+export async function query({ status }: { status: any }) {
   return request('/api-local/todolist', {
-    params,
+    method: 'POST',
+    data: {
+      status,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
   });
 }
 

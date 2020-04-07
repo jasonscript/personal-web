@@ -58,13 +58,17 @@ export const TodoList: FC<ListProps> = props => {
     dispatch,
     todolist: { list },
   } = props;
+  const [status, setStatus] = useState<number>(-1);
   const [done, setDone] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
   const [current, setCurrent] = useState<Partial<TodoItemDataType> | undefined>(undefined);
 
-  const toFetch = () => {
+  const toFetch = (statusValue: number) => {
     dispatch({
       type: 'todolist/fetch',
+      payload: {
+        status: statusValue,
+      },
     });
   };
 
@@ -76,11 +80,11 @@ export const TodoList: FC<ListProps> = props => {
         status: item.status === 'default' ? 1 : 2,
       },
     });
-    toFetch();
+    toFetch(status);
   };
 
   useEffect(() => {
-    toFetch();
+    toFetch(-1);
   }, [1]);
 
   const paginationProps = {
@@ -119,13 +123,19 @@ export const TodoList: FC<ListProps> = props => {
     }
   };
 
+  const handleStatusChange = (e: any) => {
+    const { value } = e.target;
+    setStatus(value);
+    toFetch(value);
+  };
+
   const extraContent = (
     <div className={styles.extraContent}>
-      <RadioGroup defaultValue="all">
-        <RadioButton value="all">全部</RadioButton>
-        <RadioButton value="progress">进行中</RadioButton>
-        <RadioButton value="waiting">等待中</RadioButton>
-        <RadioButton value="done">已完成</RadioButton>
+      <RadioGroup value={status} onChange={handleStatusChange}>
+        <RadioButton value={-1}>全部</RadioButton>
+        <RadioButton value={1}>进行中</RadioButton>
+        <RadioButton value={0}>等待中</RadioButton>
+        <RadioButton value={2}>已完成</RadioButton>
       </RadioGroup>
       <Search className={styles.extraContentSearch} placeholder="请输入" onSearch={() => ({})} />
     </div>
@@ -162,7 +172,7 @@ export const TodoList: FC<ListProps> = props => {
     setDone(false);
     setVisible(false);
 
-    toFetch();
+    toFetch(status);
   };
 
   const handleCancel = () => {
