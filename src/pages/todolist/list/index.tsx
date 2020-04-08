@@ -56,7 +56,7 @@ export const TodoList: FC<ListProps> = props => {
   const {
     loading,
     dispatch,
-    todolist: { list },
+    todolist: { list, todoCount },
   } = props;
   const [status, setStatus] = useState<number>(-1);
   const [done, setDone] = useState<boolean>(false);
@@ -68,6 +68,12 @@ export const TodoList: FC<ListProps> = props => {
       type: 'todolist/fetch',
       payload: {
         status: statusValue,
+      },
+    });
+    dispatch({
+      type: 'todolist/fetchCount',
+      payload: {
+        status: [0, 1],
       },
     });
   };
@@ -199,11 +205,7 @@ export const TodoList: FC<ListProps> = props => {
           <Card bordered={false}>
             <Row>
               <Col sm={24} xs={24}>
-                <Info
-                  title="我的待办"
-                  value={list.filter((item: TodoItemDataType) => item.status !== 'success').length}
-                  bordered
-                />
+                <Info title="我的待办" value={todoCount} bordered />
               </Col>
             </Row>
           </Card>

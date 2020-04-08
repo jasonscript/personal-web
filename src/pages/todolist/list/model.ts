@@ -6,6 +6,7 @@ import { TodoItemDataType } from './data.d';
 
 export interface StateType {
   list: TodoItemDataType[];
+  todoCount: number;
 }
 
 export type Effect = (
@@ -18,12 +19,11 @@ export interface ModelType {
   state: StateType;
   effects: {
     fetch: Effect;
-    appendFetch: Effect;
+    fetchCount: Effect;
     submit: Effect;
   };
   reducers: {
     queryList: Reducer<StateType>;
-    appendList: Reducer<StateType>;
   };
 }
 
@@ -38,6 +38,7 @@ const Model: ModelType = {
 
   state: {
     list: [],
+    todoCount: 0,
   },
 
   effects: {
@@ -48,14 +49,18 @@ const Model: ModelType = {
       });
       yield put({
         type: 'queryList',
-        payload: Array.isArray(response) ? response : [],
+        payload: {
+          list: Array.isArray(response) ? response : [],
+        },
       });
     },
-    *appendFetch({ payload }, { call, put }) {
+    *fetchCount({ payload }, { call, put }) {
       const response = yield call(query, payload);
       yield put({
-        type: 'appendList',
-        payload: Array.isArray(response) ? response : [],
+        type: 'queryList',
+        payload: {
+          todoCount: Array.isArray(response) ? response.length : 0,
+        },
       });
     },
     *submit({ payload }, { call }) {
@@ -71,16 +76,10 @@ const Model: ModelType = {
   },
 
   reducers: {
-    queryList(state, action) {
+    queryList(state, { payload }) {
       return {
         ...state,
-        list: action.payload,
-      };
-    },
-    appendList(state = { list: [] }, action) {
-      return {
-        ...state,
-        list: state.list.concat(action.payload),
+        ...payload,
       };
     },
   },
