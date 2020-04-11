@@ -109,11 +109,12 @@ export const TodoList: FC<ListProps> = props => {
     setCurrent(item);
   };
 
-  const deleteItem = (id: number) => {
-    dispatch({
+  const deleteItem = async (id: number) => {
+    await dispatch({
       type: 'todolist/submit',
       payload: { id },
     });
+    toFetch(status);
   };
 
   const editAndDelete = (key: string, currentItem: TodoItemDataType) => {

@@ -18,20 +18,6 @@ export async function query({ status }: { status: any }) {
   });
 }
 
-export async function removeFakeList(params: ParamsType) {
-  const { count = 5, ...restParams } = params;
-  return request('/api/fake_list', {
-    method: 'POST',
-    params: {
-      count,
-    },
-    data: {
-      ...restParams,
-      method: 'delete',
-    },
-  });
-}
-
 export async function addTodo(params: ParamsType) {
   return request('/api-local/todolist', {
     method: 'PUT',
@@ -62,6 +48,14 @@ export const updateTodo = async ({ id, ...values }: { id: number; values: TodoIt
     data: {
       ...values,
     },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
+  });
+
+export const delTodo = async ({ id }: { id: number }) =>
+  request(`/api-local/todolist/${id}`, {
+    method: 'DELETE',
     headers: {
       'x-csrf-token': getCookie('csrfToken'),
     },
