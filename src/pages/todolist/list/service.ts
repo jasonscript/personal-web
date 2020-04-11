@@ -55,3 +55,14 @@ export async function updateStatus({ id, status }: { id: number; status: number 
     },
   });
 }
+
+export const updateTodo = async ({ id, ...values }: { id: number; values: TodoItemDataType }) =>
+  request(`/api-local/todolist/${id}`, {
+    method: 'POST',
+    data: {
+      ...values,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
+  });

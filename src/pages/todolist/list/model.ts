@@ -1,6 +1,6 @@
 import { AnyAction, Reducer } from 'redux';
 import { EffectsCommandMap } from 'dva';
-import { addTodo, query, removeFakeList, updateStatus } from './service';
+import { addTodo, query, removeFakeList, updateStatus, updateTodo } from './service';
 
 import { TodoItemDataType } from './data.d';
 
@@ -66,7 +66,14 @@ const Model: ModelType = {
     *submit({ payload }, { call }) {
       let callback;
       if (payload.id) {
-        callback = Object.keys(payload).length === 1 ? removeFakeList : updateStatus;
+        const payloadParamsCount = Object.keys(payload).length;
+        if (payloadParamsCount === 1) {
+          callback = removeFakeList;
+        } else if (payloadParamsCount === 2) {
+          callback = updateStatus;
+        } else {
+          callback = updateTodo;
+        }
       } else {
         callback = addTodo;
       }

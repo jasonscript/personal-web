@@ -188,6 +188,9 @@ export const TodoList: FC<ListProps> = props => {
 
   const handleSubmit = (values: TodoItemDataType) => {
     const id = current ? current.id : null;
+    if (values.description === null) {
+      delete values.description;
+    }
 
     setAddBtnblur();
 
