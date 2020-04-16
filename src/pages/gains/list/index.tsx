@@ -13,7 +13,7 @@ import moment from 'moment';
 
 import CreateForm from './components/CreateForm';
 import { TableListItem } from './data.d';
-import { queryGains, addGains, checkGains } from './service';
+import { queryGains, addGains } from './service';
 
 const IconFont = createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_1688330_dmpevidkpun.js',
@@ -45,6 +45,7 @@ const TableList: React.FC<{}> = () => {
       title: '序号',
       dataIndex: 'id',
       hideInForm: true,
+      hideInSearch: true,
     },
     {
       title: '日期',
@@ -55,23 +56,6 @@ const TableList: React.FC<{}> = () => {
           required: true,
           message: '日期为必填项',
         },
-        ({ getFieldValue }) => ({
-          async validator(rule, value) {
-            if (!value) {
-              return Promise.resolve();
-            }
-            const params = {
-              date: value.format('YYYY-MM-DD'),
-              name: getFieldValue('name'),
-              channel: getFieldValue('channel'),
-            };
-            const res = await checkGains(params);
-            if (res) {
-              return Promise.reject(new Error('重复记录'));
-            }
-            return Promise.resolve();
-          },
-        }),
       ],
       valueType: 'date',
     },
@@ -132,6 +116,7 @@ const TableList: React.FC<{}> = () => {
     {
       title: '收益',
       dataIndex: 'money',
+      hideInSearch: true,
       rules: [
         {
           required: true,
