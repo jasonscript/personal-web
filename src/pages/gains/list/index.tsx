@@ -26,10 +26,14 @@ const IconFont = createFromIconfontCN({
 const handleAdd = async (fields: TableListItem) => {
   const hide = message.loading('正在添加');
   try {
-    await addGains({ ...fields });
+    const res = await addGains({ ...fields });
     hide();
-    message.success('添加成功');
-    return true;
+    if (res.success) {
+      message.success('添加成功');
+      return true;
+    }
+    message.error(res.errorMessage);
+    return false;
   } catch (error) {
     hide();
     message.error('添加失败请重试！');
