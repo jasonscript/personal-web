@@ -5,6 +5,7 @@ import React from 'react';
 import Slider from 'bizcharts-plugin-slider';
 import autoHeight from '../autoHeight';
 import styles from './index.less';
+import moment from 'moment';
 
 export interface TimelineChartProps {
   data: {
@@ -46,9 +47,13 @@ const TimelineChart: React.FC<TimelineChartProps> = props => {
     );
   }
 
+  const lastDay = moment(data[data.length - 1].x).format('YYYY-MM-DD');
+  const defaultStart = moment(lastDay)
+    .subtract(13, 'day')
+    .valueOf();
   const ds = new DataSet({
     state: {
-      start: data[0].x,
+      start: defaultStart,
       end: data[data.length - 1].x,
     },
   });
