@@ -150,12 +150,19 @@ export default {
                 },
               ],
             },
-            /* {
+            {
               path: '/steps',
               name: 'steps',
               icon: 'aim',
-              routes: []
-            }, */
+              routes: [
+                {
+                  name: 'list',
+                  icon: 'table',
+                  path: '/steps/list',
+                  component: './steps/list',
+                },
+              ],
+            },
             {
               path: '/todolist',
               name: 'todolist',
