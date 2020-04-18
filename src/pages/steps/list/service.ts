@@ -1,5 +1,6 @@
 import request from '@/utils/request';
-import { TableListParams } from './data.d';
+import { getCookie } from '@/utils/utils';
+import { TableListParams, StepsDataType } from './data.d';
 
 export async function queryRule(params?: TableListParams) {
   return request('/api/rule', {
@@ -42,3 +43,18 @@ export async function updateRule(params: TableListParams) {
  */
 export const querySteps = async () =>
   request('/api-local/steps').then(res => ({ data: res, total: res.length }));
+
+/**
+ * 新增步数
+ * @param params 步数参数
+ */
+export const addSteps = async (params: StepsDataType) =>
+  request('/api-local/steps', {
+    method: 'PUT',
+    data: {
+      ...params,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
+  });

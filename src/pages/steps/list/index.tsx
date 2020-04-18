@@ -7,21 +7,23 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import CreateForm from './components/CreateForm';
 import UpdateForm, { FormValueType } from './components/UpdateForm';
 import { StepsDataType } from './data.d';
-import { querySteps, updateRule, addRule } from './service';
+import { querySteps, updateRule, addSteps } from './service';
 
 /**
- * 添加节点
- * @param fields
+ * 新增步数
+ * @param fields 表单字段
  */
-const handleAdd = async (fields: FormValueType) => {
+const handleAdd = async (fields: StepsDataType) => {
   const hide = message.loading('正在添加');
   try {
-    await addRule({
-      desc: fields.desc,
-    });
+    const result = await addSteps(fields);
     hide();
-    message.success('添加成功');
-    return true;
+    if (result.success) {
+      message.success('添加成功');
+      return true;
+    }
+    message.error(result.errorMessage);
+    return false;
   } catch (error) {
     hide();
     message.error('添加失败请重试！');
@@ -85,7 +87,7 @@ const TableList: React.FC<{}> = () => {
         rowKey="id"
         toolBarRender={() => [
           <Button icon={<PlusOutlined />} type="primary" onClick={() => handleModalVisible(true)}>
-            新建
+            新增
           </Button>,
         ]}
         request={() => querySteps()}

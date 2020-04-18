@@ -1,11 +1,12 @@
 import React from 'react';
-import { Form, Input, Modal } from 'antd';
+import { Form, DatePicker, Radio, InputNumber, Modal } from 'antd';
+import moment from 'moment';
 
 const FormItem = Form.Item;
 
 interface CreateFormProps {
   modalVisible: boolean;
-  onSubmit: (fieldsValue: { desc: string }) => void;
+  onSubmit: (fieldsValue: any) => void;
   onCancel: () => void;
 }
 
@@ -15,26 +16,47 @@ const CreateForm: React.FC<CreateFormProps> = props => {
   const { modalVisible, onSubmit: handleAdd, onCancel } = props;
   const okHandle = async () => {
     const fieldsValue = await form.validateFields();
-    form.resetFields();
+    fieldsValue.date = fieldsValue.date.format('YYYY-MM-DD');
     handleAdd(fieldsValue);
   };
   return (
     <Modal
       destroyOnClose
-      title="新建规则"
+      title="新增步数"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => onCancel()}
     >
-      <Form form={form}>
+      <Form form={form} initialValues={{ date: moment(), name: 'Jason' }}>
         <FormItem
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 15 }}
-          label="描述"
-          name="desc"
-          rules={[{ required: true, message: '请输入至少五个字符的规则描述！', min: 5 }]}
+          label="日期"
+          name="date"
+          rules={[{ required: true, message: '请选择日期！' }]}
         >
-          <Input placeholder="请输入" />
+          <DatePicker />
+        </FormItem>
+        <FormItem
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 15 }}
+          label="名字"
+          name="name"
+          rules={[{ required: true, message: '请选择名字！' }]}
+        >
+          <Radio.Group>
+            <Radio value="Jason">Jason</Radio>
+            <Radio value="Qier">Qier</Radio>
+          </Radio.Group>
+        </FormItem>
+        <FormItem
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 15 }}
+          label="步数"
+          name="steps"
+          rules={[{ required: true, message: '请输入步数！' }]}
+        >
+          <InputNumber />
         </FormItem>
       </Form>
     </Modal>
