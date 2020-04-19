@@ -2,6 +2,8 @@ import React from 'react';
 import { Form, DatePicker, Radio, InputNumber, Modal } from 'antd';
 import moment from 'moment';
 
+import { checkSteps } from '../service';
+
 const FormItem = Form.Item;
 
 interface CreateFormProps {
@@ -42,7 +44,19 @@ const CreateForm: React.FC<CreateFormProps> = props => {
           wrapperCol={{ span: 15 }}
           label="名字"
           name="name"
-          rules={[{ required: true, message: '请选择名字！' }]}
+          rules={[
+            { required: true, message: '请选择名字！' },
+            ({ getFieldValue }) => ({
+              async validator(rule, value) {
+                const date = getFieldValue('date').format('YYYY-MM-DD');
+                const result = await checkSteps({ name: value, date });
+                if (result) {
+                  return Promise.reject(new Error('重复记录'));
+                }
+                return Promise.resolve();
+              },
+            }),
+          ]}
         >
           <Radio.Group>
             <Radio value="Jason">Jason</Radio>

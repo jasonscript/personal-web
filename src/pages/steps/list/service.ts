@@ -58,3 +58,18 @@ export const addSteps = async (params: StepsDataType) =>
       'x-csrf-token': getCookie('csrfToken'),
     },
   });
+
+/**
+ * 检查是否重复
+ * @param params 步数参数
+ */
+export const checkSteps = async (params: { name: string; date: string }) =>
+  request('/api-local/steps/check', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+    headers: {
+      'x-csrf-token': getCookie('csrfToken'),
+    },
+  });
