@@ -154,6 +154,7 @@ const TableList: React.FC<{}> = () => {
         ]}
         request={params => queryGains(params)}
         columns={columns}
+        search={false}
       />
       <CreateForm onCancel={() => handleModalVisible(false)} modalVisible={createModalVisible}>
         <ProTable<TableListItem, TableListItem>
