@@ -130,7 +130,9 @@ const TableList: React.FC<{}> = () => {
       valueType: 'digit',
       render: (text, record) => (
         <span>
-          {text}
+          <span style={{ width: 40, display: 'inline-block', textAlign: 'right' }}>
+            {record.money.toFixed(2)}
+          </span>
           {record.money > 0 ? (
             <CaretUpOutlined style={{ color: '#f5222d' }} />
           ) : (
