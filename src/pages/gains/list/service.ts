@@ -3,7 +3,7 @@ import { getCookie } from '@/utils/utils';
 import { TableListParams } from './data.d';
 
 export async function queryGains(params?: TableListParams) {
-  return request('/api-local/gains', {
+  return request('/api-personal/gains', {
     params,
   }).then(res => ({ data: res, total: res.length }));
 }
@@ -19,7 +19,7 @@ export async function removeRule(params: { key: number[] }) {
 }
 
 export async function addGains(params: TableListParams) {
-  return request('/api-local/gains', {
+  return request('/api-personal/gains', {
     method: 'PUT',
     data: {
       ...params,
@@ -41,7 +41,7 @@ export async function updateRule(params: TableListParams) {
 }
 
 export async function checkGains(params: { date: string; name: string; channel: string }) {
-  return request('/api-local/gains/check', {
+  return request('/api-personal/gains/check', {
     method: 'POST',
     data: {
       ...params,

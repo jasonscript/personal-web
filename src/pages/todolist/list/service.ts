@@ -7,7 +7,7 @@ interface ParamsType extends Partial<TodoItemDataType> {
 }
 
 export async function query({ status }: { status: any }) {
-  return request('/api-local/todolist', {
+  return request('/api-personal/todolist', {
     method: 'POST',
     data: {
       status,
@@ -19,7 +19,7 @@ export async function query({ status }: { status: any }) {
 }
 
 export async function addTodo(params: ParamsType) {
-  return request('/api-local/todolist', {
+  return request('/api-personal/todolist', {
     method: 'PUT',
     data: {
       ...params,
@@ -31,7 +31,7 @@ export async function addTodo(params: ParamsType) {
 }
 
 export async function updateStatus({ id, status }: { id: number; status: number }) {
-  return request(`/api-local/todolist/${id}`, {
+  return request(`/api-personal/todolist/${id}`, {
     method: 'POST',
     data: {
       status,
@@ -43,7 +43,7 @@ export async function updateStatus({ id, status }: { id: number; status: number 
 }
 
 export const updateTodo = async ({ id, ...values }: { id: number; values: TodoItemDataType }) =>
-  request(`/api-local/todolist/${id}`, {
+  request(`/api-personal/todolist/${id}`, {
     method: 'POST',
     data: {
       ...values,
@@ -54,7 +54,7 @@ export const updateTodo = async ({ id, ...values }: { id: number; values: TodoIt
   });
 
 export const delTodo = async ({ id }: { id: number }) =>
-  request(`/api-local/todolist/${id}`, {
+  request(`/api-personal/todolist/${id}`, {
     method: 'DELETE',
     headers: {
       'x-csrf-token': getCookie('csrfToken'),

@@ -5,7 +5,7 @@ export async function fakeChartData() {
 }
 
 export async function fetchGainsData() {
-  return request('/api-local/gains').then(data => {
+  return request('/api-personal/gains').then(data => {
     data.forEach((item: any) => {
       item.date = new Date(item.date).getTime();
     });

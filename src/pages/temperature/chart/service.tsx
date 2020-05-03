@@ -5,7 +5,7 @@ export async function fakeChartData() {
 }
 
 export async function fetchTemperatureData() {
-  return request('/api-local/temperature').then(res => {
+  return request('/api-personal/temperature').then(res => {
     const temperatureData: any[] = [];
     res.forEach((item: any) => {
       const time = new Date(item.time).getTime();

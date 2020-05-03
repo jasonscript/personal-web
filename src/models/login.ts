@@ -51,8 +51,11 @@ const Model: LoginModelType = {
             if (redirect.match(/^\/.*#/)) {
               redirect = redirect.substr(redirect.indexOf('#') + 1);
             }
+            if (redirect.indexOf('/personal') === 0) {
+              redirect = redirect.substr(9);
+            }
           } else {
-            window.location.href = '/';
+            window.location.href = '/personal';
             return;
           }
         }

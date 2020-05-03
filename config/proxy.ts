@@ -12,10 +12,10 @@ export default {
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
-    '/api-local/': {
+    '/api-personal/': {
       target: 'http://localhost:7001',
       changeOrigin: true,
-      pathRewrite: { '^/api-local/': '/' },
+      pathRewrite: { '^/api-personal/': '/' },
     },
   },
   test: {

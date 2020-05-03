@@ -42,14 +42,14 @@ export async function updateRule(params: TableListParams) {
  * 查询步数数据
  */
 export const querySteps = async () =>
-  request('/api-local/steps').then(res => ({ data: res, total: res.length }));
+  request('/api-personal/steps').then(res => ({ data: res, total: res.length }));
 
 /**
  * 新增步数
  * @param params 步数参数
  */
 export const addSteps = async (params: StepsDataType) =>
-  request('/api-local/steps', {
+  request('/api-personal/steps', {
     method: 'PUT',
     data: {
       ...params,
@@ -64,7 +64,7 @@ export const addSteps = async (params: StepsDataType) =>
  * @param params 步数参数
  */
 export const checkSteps = async (params: { name: string; date: string }) =>
-  request('/api-local/steps/check', {
+  request('/api-personal/steps/check', {
     method: 'POST',
     data: {
       ...params,
